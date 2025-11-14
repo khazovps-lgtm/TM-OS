@@ -55,6 +55,15 @@ namespace MyApp
                 FormType = typeof(AmbientForm),
                 Category = "Музыка"
             });
+            
+            availableApps.Add(new AppInfo 
+            { 
+                Name = "Заметки", 
+                Description = "Создание и сохранение заметок", 
+                Icon = "📝",
+                FormType = typeof(NotesForm),
+                Category = "Утилиты"
+            });
         }
         
         private void SetupMarketApps()
@@ -148,7 +157,9 @@ namespace MyApp
                 "система" => Color.FromArgb(70, 130, 180),
                 "утилиты" => Color.FromArgb(95, 158, 160),
                 "творчество" => Color.FromArgb(218, 112, 214),
+                "графика" => Color.FromArgb(218, 112, 214),
                 "музыка" => Color.FromArgb(138, 43, 226),
+                "медиа" => Color.FromArgb(138, 43, 226),
                 _ => Color.FromArgb(100, 149, 237)
             };
         }

@@ -10,6 +10,8 @@ public partial class Form1 : Form
     private DesktopIcon? draggedIcon = null;
     private DesktopIcon? hoveredIcon = null;
     private Point dragOffset;
+    private Point targetPosition; // Целевая позиция для плавного движения
+    private bool isAnimating = false; // Флаг анимации
     private System.Windows.Forms.Timer animationTimer;
     
     public Form1()
@@ -25,7 +27,7 @@ public partial class Form1 : Form
         
         // Настройка таймера анимации
         animationTimer = new System.Windows.Forms.Timer();
-        animationTimer.Interval = 50; // 20 FPS для плавной анимации
+        animationTimer.Interval = 16; // 60 FPS для очень плавной анимации
         animationTimer.Tick += AnimationTimer_Tick;
         animationTimer.Start();
         
@@ -43,6 +45,29 @@ public partial class Form1 : Form
     
     private void AnimationTimer_Tick(object? sender, EventArgs e)
     {
+        // Плавное движение иконки при перетаскивании
+        if (isAnimating && draggedIcon != null)
+        {
+            Point currentPos = draggedIcon.Position;
+            
+            // Вычисляем новую позицию с плавным движением
+            float lerpFactor = 0.15f; // Коэффициент плавности (меньше = плавнее)
+            
+            int newX = (int)(currentPos.X + (targetPosition.X - currentPos.X) * lerpFactor);
+            int newY = (int)(currentPos.Y + (targetPosition.Y - currentPos.Y) * lerpFactor);
+            
+            draggedIcon.Position = new Point(newX, newY);
+            
+            // Перерисовываем только область иконки для оптимизации
+            Rectangle invalidateRect = new Rectangle(
+                Math.Min(currentPos.X, newX) - 10, 
+                Math.Min(currentPos.Y, newY) - 10,
+                draggedIcon.Size.Width + Math.Abs(newX - currentPos.X) + 20, 
+                draggedIcon.Size.Height + Math.Abs(newY - currentPos.Y) + 20
+            );
+            this.Invalidate(invalidateRect);
+        }
+        
         // Обновляем анимации только если есть выделенные иконки
         bool hasSelectedIcon = desktopIcons.Any(icon => icon.IsSelected);
         if (hasSelectedIcon)
@@ -274,6 +299,7 @@ public partial class Form1 : Form
                 clickedIcon.IsSelected = true;
                 draggedIcon = clickedIcon;
                 dragOffset = new Point(e.X - clickedIcon.Position.X, e.Y - clickedIcon.Position.Y);
+                targetPosition = clickedIcon.Position; // Инициализируем целевую позицию
                 
                 this.Invalidate();
             }
@@ -301,9 +327,9 @@ public partial class Form1 : Form
         
         if (draggedIcon != null && e.Button == MouseButtons.Left)
         {
-            // Перетаскиваем иконку
-            draggedIcon.Position = new Point(e.X - dragOffset.X, e.Y - dragOffset.Y);
-            this.Invalidate();
+            // Устанавливаем целевую позицию для плавного движения
+            targetPosition = new Point(e.X - dragOffset.X, e.Y - dragOffset.Y);
+            isAnimating = true;
         }
     }
     
@@ -324,6 +350,7 @@ public partial class Form1 : Form
         }
         
         draggedIcon = null;
+        isAnimating = false;
     }
     
     private DesktopIcon? GetIconAtPosition(Point position)
@@ -1100,7 +1127,7 @@ public partial class Form1 : Form
     private Point FindFreeDesktopPosition()
     {
         int startX = 50;
-        int startY = 120; // После заголовка "TM OS"
+        int startY = 250; // Чуть ниже кнопки "Перезапуск" (Y=130, высота=100, + отступ=20)
         int iconWidth = 80;
         int iconHeight = 100;
         int spacing = 20;
