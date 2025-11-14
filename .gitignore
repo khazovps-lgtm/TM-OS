@@ -1,0 +1,35 @@
+# Игнорируемые файлы и папки для Git
+
+## Visual Studio / .NET
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.dll
+*.pdb
+*.exe
+!Resources/
+
+## Windows
+Thumbs.db
+Desktop.ini
+
+## VS Code
+.vscode/
+
+## JetBrains
+.idea/
+
+## Временные файлы
+*.tmp
+*.temp
+*.log
+
+## Пользовательские настройки (не включаем в репозиторий)
+app.config
+*.config.user
+
+## Релизы (будут в отдельной папке)
+Release/
+Publish/
